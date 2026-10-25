@@ -1,0 +1,79 @@
+[
+  {
+    "id": "rev-1792402456111",
+    "productId": "kid-1",
+    "authorName": "Sana Tariq",
+    "authorCity": "Islamabad",
+    "rating": 5,
+    "comment": "MashAllah wonderful fabric and soft stitching!",
+    "childFit": "True to size",
+    "verifiedPurchase": true,
+    "createdAt": "2026-10-19T09:34:16.111Z"
+  },
+  {
+    "id": "rev-1",
+    "productId": "kid-1",
+    "authorName": "Ayesha Malik",
+    "authorCity": "Lahore (DHA)",
+    "rating": 5,
+    "comment": "SubhanAllah! The jacquard waistcoat quality is breathtaking. The brass buttons feel genuine and heavy, and the cotton-silk kurta did not itch or irritate my 3-year-old son's neck at all during Eid prayers.",
+    "childFit": "Size 3-4Y · Perfect comfortable fit",
+    "verifiedPurchase": true,
+    "createdAt": "2026-10-16T09:34:11.354Z"
+  },
+  {
+    "id": "rev-2",
+    "productId": "kid-1",
+    "authorName": "Tariq Mehmood",
+    "authorCity": "Karachi (Clifton)",
+    "rating": 5,
+    "comment": "Super fast delivery via TCS! The parcel open check on delivery gave us complete peace of mind. The fabric has an authentic Cashmirino-level handfeel.",
+    "childFit": "Size 2-3Y · True to size",
+    "verifiedPurchase": true,
+    "createdAt": "2026-10-12T09:34:11.354Z"
+  },
+  {
+    "id": "rev-3",
+    "productId": "kid-2",
+    "authorName": "Dr. Samina Khan",
+    "authorCity": "Islamabad (F-7)",
+    "rating": 5,
+    "comment": "My daughter loved twirling in this frock! The cotton inner lining is so soft. Usually boutique net scratches her skin, but Bachpan PK's finishing is truly thoughtful.",
+    "childFit": "Size 4-5Y · Generous twirl flare",
+    "verifiedPurchase": true,
+    "createdAt": "2026-10-14T09:34:11.354Z"
+  },
+  {
+    "id": "rev-4",
+    "productId": "kid-2",
+    "authorName": "Hina Bilal",
+    "authorCity": "Rawalpindi",
+    "rating": 4,
+    "comment": "Very delicate Gota lace and pastel tone matches the photos perfectly. Highly recommended for family wedding functions.",
+    "childFit": "Size 3-4Y · True to size",
+    "verifiedPurchase": true,
+    "createdAt": "2026-10-08T09:34:11.354Z"
+  },
+  {
+    "id": "rev-5",
+    "productId": "kid-3",
+    "authorName": "Zainab Qureshi",
+    "authorCity": "Faisalabad",
+    "rating": 5,
+    "comment": "Pure combed organic cotton newborn set. Snap buttons are nickel-free and easy to open for diaper changes. Premium gift box packaging too!",
+    "childFit": "Size 0-3M · Gentle on newborn skin",
+    "verifiedPurchase": true,
+    "createdAt": "2026-10-15T09:34:11.354Z"
+  },
+  {
+    "id": "rev-6",
+    "productId": "kid-4",
+    "authorName": "Mariam Farooq",
+    "authorCity": "Multan",
+    "rating": 5,
+    "comment": "Ordered this Friday Juma suit for my 4 year old boy. Pure white and wrinkle-resistant fabric. Washes easily and irons crisp.",
+    "childFit": "Size 4-5Y · Fits comfortably",
+    "verifiedPurchase": true,
+    "createdAt": "2026-10-10T09:34:11.354Z"
+  }
+]

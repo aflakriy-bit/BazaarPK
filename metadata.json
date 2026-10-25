@@ -1,0 +1,6 @@
+{
+  "name": "Bachpan PK - Premium Kids Wear",
+  "description": "Bachpan PK - Premium Kids Wear boutique with luxury minimalist aesthetic, Cashmirino-inspired collections, two-tier category system, Cash on Delivery (COD), and Admin Dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

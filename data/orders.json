@@ -1,0 +1,151 @@
+[
+  {
+    "customerName": "Mariam Tariq",
+    "mobileNumber": "03009876543",
+    "shippingAddress": "Street 5, Phase 6 DHA",
+    "city": "Lahore",
+    "province": "Punjab",
+    "items": [
+      {
+        "productId": "kid-1",
+        "title": "Boys Embroidered Kurta Shalwar",
+        "price": 2650,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 2650,
+    "deliveryFee": 150,
+    "discount": 0,
+    "totalAmount": 2800,
+    "paymentMethod": "COD",
+    "id": "BP-1005",
+    "status": "Pending Confirmation",
+    "createdAt": "2026-10-21T06:57:53.470Z",
+    "updatedAt": "2026-10-21T06:57:53.470Z"
+  },
+  {
+    "id": "BP-1001",
+    "customerName": "Fatima Bilal",
+    "mobileNumber": "0302-8452190",
+    "whatsappNumber": "0302-8452190",
+    "province": "Punjab",
+    "city": "Lahore",
+    "shippingAddress": "House 88, Street 14, Sector C, Bahria Town",
+    "nearestLandmark": "Near Talwar Chowk & Safari Park",
+    "orderNotes": "Need before Eid! Please confirm dispatch quickly.",
+    "items": [
+      {
+        "productId": "kid-1",
+        "title": "Boys Embroidered Kurta Shalwar with Jacquard Waistcoat (Baba Suit)",
+        "price": 2650,
+        "quantity": 1,
+        "selectedSize": "3-4Y",
+        "imageUrl": "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        "productId": "kid-2",
+        "title": "Guriya Pastel Chiffon Twirl Frock with Gota Patti",
+        "price": 2890,
+        "quantity": 1,
+        "selectedSize": "4-5Y",
+        "imageUrl": "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&w=800&q=80"
+      }
+    ],
+    "subtotal": 5540,
+    "deliveryFee": 150,
+    "discount": 500,
+    "totalAmount": 5190,
+    "paymentMethod": "COD",
+    "status": "Pending Confirmation",
+    "createdAt": "2026-10-20T21:45:00.000Z",
+    "updatedAt": "2026-10-22T08:08:02.737Z"
+  },
+  {
+    "id": "BP-1002",
+    "customerName": "Usman Ghani",
+    "mobileNumber": "0321-7654321",
+    "whatsappNumber": "0321-7654321",
+    "province": "Sindh",
+    "city": "Karachi",
+    "shippingAddress": "House 22-A, Block 7, Clifton",
+    "nearestLandmark": "Behind Teen Talwar",
+    "orderNotes": "Please ring the bell twice.",
+    "items": [
+      {
+        "productId": "kid-3",
+        "title": "Pure Organic Cotton Newborn 3-Piece Romper & Beanie Set",
+        "price": 1650,
+        "quantity": 2,
+        "selectedSize": "0-3M",
+        "imageUrl": "https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&w=800&q=80"
+      }
+    ],
+    "subtotal": 3300,
+    "deliveryFee": 150,
+    "discount": 0,
+    "totalAmount": 3450,
+    "paymentMethod": "EASYPAISA_JAZZCASH",
+    "paymentReference": "TID-99281726 (Paid via Easypaisa)",
+    "status": "Delivered",
+    "createdAt": "2026-10-19T10:00:00.000Z",
+    "updatedAt": "2026-10-20T12:00:00.000Z"
+  },
+  {
+    "id": "BP-1003",
+    "customerName": "Dr. Samina Khan",
+    "mobileNumber": "0333-5129988",
+    "whatsappNumber": "0333-5129988",
+    "province": "Islamabad Capital Territory",
+    "city": "Islamabad",
+    "shippingAddress": "House 14, Street 9, Sector F-7/2",
+    "nearestLandmark": "Near Jinnah Super Market",
+    "orderNotes": "Deliver during afternoon hours please.",
+    "items": [
+      {
+        "productId": "kid-2",
+        "title": "Guriya Pastel Chiffon Twirl Frock with Gota Patti",
+        "price": 2890,
+        "quantity": 1,
+        "selectedSize": "3-4Y",
+        "imageUrl": "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&w=800&q=80"
+      }
+    ],
+    "subtotal": 2890,
+    "deliveryFee": 150,
+    "discount": 0,
+    "totalAmount": 3040,
+    "paymentMethod": "COD",
+    "status": "Dispatched",
+    "createdAt": "2026-10-20T08:30:00.000Z",
+    "updatedAt": "2026-10-20T14:15:00.000Z"
+  },
+  {
+    "id": "BP-1004",
+    "customerName": "Haris Raza",
+    "mobileNumber": "0345-9876543",
+    "whatsappNumber": "0345-9876543",
+    "province": "Punjab",
+    "city": "Faisalabad",
+    "shippingAddress": "Street 4, Madina Town",
+    "nearestLandmark": "Near Susan Road",
+    "orderNotes": "Customer requested cancellation over call.",
+    "items": [
+      {
+        "productId": "kid-1",
+        "title": "Boys Embroidered Kurta Shalwar with Jacquard Waistcoat",
+        "price": 2650,
+        "quantity": 1,
+        "selectedSize": "2-3Y",
+        "imageUrl": "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=800&q=80"
+      }
+    ],
+    "subtotal": 2650,
+    "deliveryFee": 250,
+    "discount": 0,
+    "totalAmount": 2900,
+    "paymentMethod": "COD",
+    "status": "Canceled",
+    "createdAt": "2026-10-18T16:00:00.000Z",
+    "updatedAt": "2026-10-19T09:00:00.000Z"
+  }
+]
