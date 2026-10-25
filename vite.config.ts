@@ -7,7 +7,7 @@ import { defineConfig } from 'vite';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default defineConfig(() => {
+export default defineConfig((base: '/aapki-repository-ka-naam/',) => {
   return {
     // Tailwind CSS v4 Vite integration:
     // Automatically scans project root (index.html) and all source files in /src (components, data, services, types, utils).
