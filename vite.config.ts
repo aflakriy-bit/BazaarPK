@@ -7,27 +7,19 @@ import { defineConfig } from 'vite';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default defineConfig((base: '/bachpan-pk/',) => {
-  return {
-    // Tailwind CSS v4 Vite integration:
-    // Automatically scans project root (index.html) and all source files in /src (components, data, services, types, utils).
-    // Explicitly bolstered via @source directives in src/index.css and tailwind.config.js content paths.
-    plugins: [
-      react(),
-      tailwindcss(),
-    ],
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, '.'),
-      },
+export default defineConfig({
+  base: '/bachpan-pk/',
+  plugins: [
+    react(),
+    tailwindcss(),
+  ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, '.'),
     },
-    server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modify—file watching is disabled to prevent flickering during agent edits.
-      hmr: process.env.DISABLE_HMR !== 'true',
-      // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
-      watch: process.env.DISABLE_HMR === 'true' ? null : {},
-    },
-  };
+  },
+  server: {
+    hmr: process.env.DISABLE_HMR === 'true',
+    watch: process.env.DISABLE_HMR === 'true' ? null : {},
+  },
 });
-
