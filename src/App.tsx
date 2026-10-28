@@ -26,6 +26,10 @@ import { AboutUsModal } from './components/AboutUsModal';
 import { SizeGuideModal } from './components/SizeGuideModal';
 import { OrderTrackingModal } from './components/OrderTrackingModal';
 import { SponsorBannerSlot } from './components/SponsorBannerSlot';
+import { ExploreByAgeSection } from './components/ExploreByAgeSection';
+import { ProductHighlightShowcase } from './components/ProductHighlightShowcase';
+import { ParentFavoritesCollage } from './components/ParentFavoritesCollage';
+import { PriceRangeFilter } from './components/PriceRangeFilter';
 import { Product, CartItem, Order, StoreLayoutConfig, DEFAULT_LAYOUT_CONFIG, Promotion } from './types';
 import { KIDS_CATEGORIES } from './data/initialData';
 import { api } from './services/api';
@@ -53,6 +57,7 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>('All Ages');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [maxBudgetFilter, setMaxBudgetFilter] = useState<number | null>(null);
 
   // Customer Modals & Drawers
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -275,9 +280,23 @@ export default function App() {
     return sortByPriority(list).slice(0, 4);
   }, [products, matchCategory]);
 
-  // Filtered Products for the Main Catalog Grid (sorted by Display Weight/Priority 1, 2, 3...)
-  const filteredProducts = useMemo(() => {
-    const matched = products.filter((prod) => {
+  // Minimum and Maximum prices in current product database
+  const { minCatalogPrice, maxCatalogPrice } = useMemo(() => {
+    if (!products.length) return { minCatalogPrice: 1000, maxCatalogPrice: 5000 };
+    const prices = products.map((p) => p.price);
+    const minP = Math.min(...prices);
+    const maxP = Math.max(...prices);
+    return {
+      minCatalogPrice: Math.floor(minP / 100) * 100,
+      maxCatalogPrice: Math.ceil(maxP / 100) * 100,
+    };
+  }, [products]);
+
+  const effectiveMaxBudget = maxBudgetFilter !== null ? maxBudgetFilter : maxCatalogPrice;
+
+  // Products matching category, age, and search (before price filter, for count display)
+  const categoryAndAgeMatchedProducts = useMemo(() => {
+    return products.filter((prod) => {
       const matchCat = matchCategory(prod, selectedCategory);
       const matchAge = matchesAgeGroup(prod, selectedAgeGroup);
       const matchSearch =
@@ -288,9 +307,16 @@ export default function App() {
         (prod.ageGroup && prod.ageGroup.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchCat && matchAge && matchSearch;
     });
+  }, [products, selectedCategory, selectedAgeGroup, searchQuery, matchCategory]);
+
+  // Filtered Products for the Main Catalog Grid (sorted by Display Weight/Priority 1, 2, 3...)
+  const filteredProducts = useMemo(() => {
+    const matched = categoryAndAgeMatchedProducts.filter((prod) => {
+      return maxBudgetFilter !== null ? prod.price <= maxBudgetFilter : true;
+    });
 
     return sortByPriority(matched);
-  }, [products, selectedCategory, selectedAgeGroup, searchQuery, matchCategory]);
+  }, [categoryAndAgeMatchedProducts, maxBudgetFilter]);
 
   // Reel-enabled products
   const reelProducts = useMemo(() => {
@@ -564,18 +590,28 @@ export default function App() {
         isDarkMode={isCustomerDark}
       />
 
-      {/* 2. Full-Width Photography or Autoplaying Background Video Hero Banner */}
+      {/* 2. Wix Juniper Romp: Triple-Split Vertical Hero Section with Floating Minimalist Card (100vh) */}
       {layoutConfig.showHeroBanner && (
         <HeroBanner
+          layoutType={layoutConfig.heroLayoutType || 'triple_split'}
           imageUrl={layoutConfig.heroBannerImageUrl}
           videoUrl={layoutConfig.heroBannerVideoUrl}
           mediaType={layoutConfig.heroBannerMediaType || 'image'}
-          containerHeight={layoutConfig.heroBannerHeight || 680}
+          containerHeight={layoutConfig.heroBannerHeight || 740}
           mediaScale={layoutConfig.heroBannerScale || 100}
           focalPoint={layoutConfig.heroBannerFocalPoint || 'center'}
           tagText={layoutConfig.heroBannerTag}
           headline={layoutConfig.heroBannerTitle}
           subtitle={layoutConfig.heroBannerSubtitle}
+          column1Image={layoutConfig.heroColumn1ImageUrl}
+          column2Image={layoutConfig.heroColumn2ImageUrl}
+          column3Image={layoutConfig.heroColumn3ImageUrl}
+          floatingKicker={layoutConfig.heroFloatingCardKicker}
+          floatingTitle={layoutConfig.heroFloatingCardTitle}
+          floatingSubtitle={layoutConfig.heroFloatingCardSubtitle}
+          floatingCtaText={layoutConfig.heroFloatingCardCta}
+          floatingTagline={layoutConfig.heroFloatingCardTagline}
+          isDarkMode={isCustomerDark}
           onExploreReels={() => {
             if (reelProducts.length > 0) {
               handleOpenReel(reelProducts[0]);
@@ -585,7 +621,7 @@ export default function App() {
             }
           }}
           onExploreProducts={() => {
-            const el = document.getElementById('new-arrivals-section') || document.getElementById('kids-products-section');
+            const el = document.getElementById('explore-by-age-section') || document.getElementById('kids-products-section');
             el?.scrollIntoView({ behavior: 'smooth' });
           }}
         />
@@ -615,6 +651,59 @@ export default function App() {
           ctaText={layoutConfig.sponsorBannerCtaText}
           link={layoutConfig.sponsorBannerLink}
           imageUrl={layoutConfig.sponsorBannerImageUrl}
+          isDarkMode={isCustomerDark}
+        />
+      )}
+
+      {/* Wix Juniper Romp Block 2: Minimalist Explore By Age Grid (3 Tall Vertical Cards with Diagonal Arrow) */}
+      {(layoutConfig.showExploreByAge ?? true) && (
+        <div id="explore-by-age-section">
+          <ExploreByAgeSection
+            title={layoutConfig.exploreByAgeTitle}
+            subtitle={layoutConfig.exploreByAgeSubtitle}
+            babyImage={layoutConfig.exploreBabyImageUrl}
+            toddlerImage={layoutConfig.exploreToddlerImageUrl}
+            kidsImage={layoutConfig.exploreKidsImageUrl}
+            isDarkMode={isCustomerDark}
+            onSelectAge={(ageLabel, categoryFallback) => {
+              setSelectedAgeGroup(ageLabel);
+              setSelectedCategory(categoryFallback);
+              const el = document.getElementById('kids-products-section');
+              el?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          />
+        </div>
+      )}
+
+      {/* Wix Juniper Romp Block 3: Independent Highlight Showcase (Large Centered Garment + Geometric Star Bullets) */}
+      {(layoutConfig.showHighlightShowcase ?? true) && (
+        <ProductHighlightShowcase
+          featuredProduct={products.find(p => p.id === 'kid-1' || p.category === 'Newborn') || products[0]}
+          title={layoutConfig.highlightShowcaseTitle}
+          subtitle={layoutConfig.highlightShowcaseSubtitle}
+          kicker={layoutConfig.highlightShowcaseKicker}
+          price={layoutConfig.highlightShowcasePrice}
+          imageUrl={layoutConfig.highlightShowcaseImageUrl}
+          bullet1={layoutConfig.highlightBullet1}
+          bullet2={layoutConfig.highlightBullet2}
+          bullet3={layoutConfig.highlightBullet3}
+          bullet4={layoutConfig.highlightBullet4}
+          isDarkMode={isCustomerDark}
+          onOpenProduct={(p) => handleOpenLightbox(p || products[0])}
+        />
+      )}
+
+      {/* Wix Juniper Romp Block 4: Asymmetric Photography Collage Grid ("Parent Favorites / Loved Right Now") */}
+      {(layoutConfig.showParentFavoritesCollage ?? true) && (
+        <ParentFavoritesCollage
+          products={products}
+          onOpenProduct={handleOpenLightbox}
+          title={layoutConfig.parentFavoritesTitle}
+          subtitle={layoutConfig.parentFavoritesSubtitle}
+          hero1Url={layoutConfig.parentFavoritesHero1Url}
+          hero1Title={layoutConfig.parentFavoritesHero1Title}
+          hero2Url={layoutConfig.parentFavoritesHero2Url}
+          hero2Title={layoutConfig.parentFavoritesHero2Title}
           isDarkMode={isCustomerDark}
         />
       )}
@@ -974,6 +1063,18 @@ export default function App() {
                     <span className="underline ml-0.5 font-normal">Show All</span>
                   </button>
                 )}
+
+                {maxBudgetFilter !== null && maxBudgetFilter < maxCatalogPrice && (
+                  <button
+                    type="button"
+                    onClick={() => setMaxBudgetFilter(null)}
+                    className="inline-flex items-center gap-1 text-[11px] text-[#C89299] bg-[#C89299]/15 hover:bg-[#C89299]/25 px-2.5 py-0.5 rounded-full border border-[#C89299]/30 transition-colors cursor-pointer"
+                  >
+                    <span>Budget: Up to Rs. {maxBudgetFilter.toLocaleString()}</span>
+                    <span className="font-bold ml-1 text-xs leading-none">×</span>
+                    <span className="underline ml-0.5 font-normal">Clear</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -993,7 +1094,7 @@ export default function App() {
           </div>
 
           {/* DYNAMIC AGE-GROUP QUICK FILTER ROW */}
-          <div className="pt-4 pb-6 flex items-center justify-between flex-wrap gap-3">
+          <div className="pt-4 pb-2 flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-neutral-400 mr-1">
                 Filter by Age:
@@ -1028,19 +1129,33 @@ export default function App() {
             )}
           </div>
 
+          {/* PRICE RANGE BUDGET SLIDER FILTER */}
+          <PriceRangeFilter
+            minPrice={minCatalogPrice}
+            maxPrice={maxCatalogPrice}
+            currentMaxPrice={effectiveMaxBudget}
+            onChangeMaxPrice={(val) => setMaxBudgetFilter(val >= maxCatalogPrice ? null : val)}
+            onReset={() => setMaxBudgetFilter(null)}
+            matchingCount={filteredProducts.length}
+            totalCount={categoryAndAgeMatchedProducts.length}
+            isDarkMode={isCustomerDark}
+          />
+
           {/* Clean Multi-Column Product Grid */}
           {filteredProducts.length === 0 ? (
             <div className="py-24 text-center space-y-4">
-              <p className="font-serif text-xl text-neutral-700">No outfits found matching your search.</p>
-              <p className="text-xs text-neutral-400 font-light">Try adjusting your category filter or search keywords.</p>
+              <p className="font-serif text-xl text-neutral-700 dark:text-neutral-300">No outfits found matching your filters.</p>
+              <p className="text-xs text-neutral-400 font-light">Try adjusting your budget slider, category filter, or age selection.</p>
               <button
                 onClick={() => {
                   setSelectedCategory('All');
+                  setSelectedAgeGroup('All Ages');
+                  setMaxBudgetFilter(null);
                   setSearchQuery('');
                 }}
-                className="px-6 py-2.5 border border-neutral-900 text-neutral-900 hover:bg-neutral-900 hover:text-white text-xs uppercase tracking-widest transition-colors cursor-pointer"
+                className="px-6 py-2.5 border border-neutral-900 dark:border-neutral-200 text-neutral-900 dark:text-white hover:bg-neutral-900 hover:text-white dark:hover:bg-white dark:hover:text-neutral-950 text-xs uppercase tracking-widest transition-colors cursor-pointer"
               >
-                Reset Filters
+                Reset All Filters
               </button>
             </div>
           ) : (

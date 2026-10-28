@@ -215,16 +215,56 @@ export interface StoreLayoutConfig {
   announcementText?: string; // Dynamic Header Announcement Ticker
   globalSizeChartImageUrl?: string; // Standard kids size chart image uploaded by Admin
   
-  // Hero Banner Dynamic Media & Cropping Controller
-  heroBannerImageUrl?: string; // Dynamic Homepage Hero Background Image
+  // Hero Banner Dynamic Media & Cropping Controller (Juniper Romp Triple-Split Hero)
+  heroLayoutType?: 'triple_split' | 'single';
+  heroBannerImageUrl?: string; // Dynamic Homepage Hero Background Image (Single mode)
   heroBannerVideoUrl?: string; // Dynamic Homepage Background Video (HTML5)
   heroBannerMediaType?: 'image' | 'video'; // 'image' or 'video'
-  heroBannerHeight?: number; // Container Height in px (e.g. 500 to 850, default: 680)
+  heroBannerHeight?: number; // Container Height in px (e.g. 500 to 850, default: 720)
   heroBannerScale?: number; // Media Scale/Zoom in % (e.g. 100 to 150, default: 100)
   heroBannerFocalPoint?: 'top' | 'center' | 'bottom' | 'left' | 'right'; // Focal point cropper alignment
-  heroBannerTag?: string; // Season Kicker / Tag (e.g. "TINY ONES, BIG FIRSTS" or "SPRING / SUMMER 2026")
+  heroBannerTag?: string; // Season Kicker / Tag
   heroBannerTitle?: string; // Headline in Cormorant Garamond
   heroBannerSubtitle?: string; // Description text overlay
+
+  // Wix Juniper Romp: Triple-Split Vertical Hero 3 Individual Columns & Floating Card
+  heroColumn1ImageUrl?: string; // Column 1 portrait image (Baby / Romper)
+  heroColumn2ImageUrl?: string; // Column 2 portrait image (Toddler / Knitwear)
+  heroColumn3ImageUrl?: string; // Column 3 portrait image (Playful child / Festive)
+  heroFloatingCardKicker?: string; // Floating Card brand tag
+  heroFloatingCardTitle?: string; // Floating Card headline e.g. "Made For Pure Play"
+  heroFloatingCardSubtitle?: string; // Floating Card descriptive body text
+  heroFloatingCardCta?: string; // Pill-shaped black CTA button e.g. "Shop All Products"
+  heroFloatingCardTagline?: string; // Extra trust line
+
+  // Wix Juniper Romp: Minimalist Explore By Age Grid (3 Tall Vertical Cards with Diagonal Arrow)
+  showExploreByAge?: boolean;
+  exploreByAgeTitle?: string;
+  exploreByAgeSubtitle?: string;
+  exploreBabyImageUrl?: string;
+  exploreToddlerImageUrl?: string;
+  exploreKidsImageUrl?: string;
+
+  // Wix Juniper Romp: Independent Highlight Showcase (Large Centered Garment + Geometric Star Bullets)
+  showHighlightShowcase?: boolean;
+  highlightShowcaseKicker?: string;
+  highlightShowcaseTitle?: string;
+  highlightShowcaseSubtitle?: string;
+  highlightShowcasePrice?: number;
+  highlightShowcaseImageUrl?: string;
+  highlightBullet1?: string;
+  highlightBullet2?: string;
+  highlightBullet3?: string;
+  highlightBullet4?: string;
+
+  // Wix Juniper Romp: Asymmetric Photography Collage Grid ("Parent Favorites / Loved Right Now")
+  showParentFavoritesCollage?: boolean;
+  parentFavoritesTitle?: string;
+  parentFavoritesSubtitle?: string;
+  parentFavoritesHero1Url?: string;
+  parentFavoritesHero1Title?: string;
+  parentFavoritesHero2Url?: string;
+  parentFavoritesHero2Title?: string;
   
   // Trust Badges Bar Settings
   showTrustBadgesBar?: boolean; // 3-column Trust Banner Bar (COD Available, PostEx Tracking, Real Photo)
@@ -276,15 +316,58 @@ export const DEFAULT_LAYOUT_CONFIG: StoreLayoutConfig = {
   showAnnouncementBar: true,
   announcementText: 'Complimentary Express Delivery on Orders Across Pakistan | Cash on Delivery Available',
   globalSizeChartImageUrl: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=1200&q=80',
+  
+  // Hero settings
+  heroLayoutType: 'triple_split',
   heroBannerImageUrl: 'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=2000&q=85',
   heroBannerVideoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
   heroBannerMediaType: 'image',
-  heroBannerHeight: 680,
+  heroBannerHeight: 740,
   heroBannerScale: 100,
   heroBannerFocalPoint: 'center',
   heroBannerTag: 'Tiny ones, big firsts',
   heroBannerTitle: 'Thoughtfully Made For Childhood Memories',
   heroBannerSubtitle: 'Hand-tailored festive Baba Suits, fairy-tale chiffon frocks, and organic newborn essentials. Crafted for delicate skin with breathable Pakistani cottons and fine silks.',
+
+  // Wix Juniper Romp: Triple-Split Hero defaults (high-res portrait photography)
+  heroColumn1ImageUrl: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=900&q=85',
+  heroColumn2ImageUrl: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=900&q=85',
+  heroColumn3ImageUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=900&q=85',
+  heroFloatingCardKicker: 'BACHPAN PK · ATELIER',
+  heroFloatingCardTitle: 'Made For Pure Play',
+  heroFloatingCardSubtitle: 'Effortless, organic kids essentials thoughtfully crafted for every crawl, step, and joyful jump.',
+  heroFloatingCardCta: 'Shop All Products',
+  heroFloatingCardTagline: '100% Breathable Cottons · Nationwide Cash on Delivery',
+
+  // Wix Juniper Romp: Explore By Age Grid
+  showExploreByAge: true,
+  exploreByAgeTitle: 'Explore By Age',
+  exploreByAgeSubtitle: 'Curated silhouettes engineered specifically for every milestone',
+  exploreBabyImageUrl: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=900&q=85',
+  exploreToddlerImageUrl: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=900&q=85',
+  exploreKidsImageUrl: 'https://images.unsplash.com/photo-1543332164-6e82f355badc?auto=format&fit=crop&w=900&q=85',
+
+  // Wix Juniper Romp: Independent Highlight Showcase
+  showHighlightShowcase: true,
+  highlightShowcaseKicker: 'ATELIER SIGNATURE SHOWCASE',
+  highlightShowcaseTitle: 'Heirloom Ribbed Knit Romper & Bonnet Set',
+  highlightShowcaseSubtitle: 'Woven from 100% combed organic cotton for sensitive newborn and toddler skin',
+  highlightShowcasePrice: 2950,
+  highlightShowcaseImageUrl: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1000&q=85',
+  highlightBullet1: '100% Organic Cotton — Butter-soft combed weave gentle on delicate skin',
+  highlightBullet2: 'Hypoallergenic Dyes — Kind to sensitive skin, zero harsh chemicals',
+  highlightBullet3: 'Play-Proof Durability — Double-stitched seams designed for high activity',
+  highlightBullet4: 'Nickel-Free Snaps — Hassle-free 10-second diaper changes',
+
+  // Wix Juniper Romp: Asymmetric Collage Grid
+  showParentFavoritesCollage: true,
+  parentFavoritesTitle: 'Loved Right Now',
+  parentFavoritesSubtitle: 'Parent favorites curated for everyday comfort and celebratory moments',
+  parentFavoritesHero1Url: 'https://images.unsplash.com/photo-1471286174890-9c112ffca56a?auto=format&fit=crop&w=1200&q=85',
+  parentFavoritesHero1Title: 'Everyday Wonder · Made for unrestricted movement',
+  parentFavoritesHero2Url: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=1000&q=85',
+  parentFavoritesHero2Title: 'Festive Jacquards & Pure Embroidered Silks',
+
   maintenanceMode: false,
   showHeroBanner: true,
   showTrustBadgesBar: true,

@@ -31,7 +31,11 @@ import {
   ShieldAlert, 
   Layers,
   ArrowRight,
-  Tag
+  Tag,
+  ArrowUpRight,
+  Volume2,
+  Star,
+  Grid
 } from 'lucide-react';
 
 interface LiveVisualCustomizerProps {
@@ -133,6 +137,66 @@ export const LiveVisualCustomizer: React.FC<LiveVisualCustomizerProps> = ({
     } catch (err: any) {
       setSaveError(err.message || 'File read error.');
       setUploadingHero(false);
+    }
+  };
+
+  // Helper for uploading any specific layout image field
+  const handleUploadField = async (field: keyof StoreLayoutConfig, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingHero(true);
+    setSaveError(null);
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const base64Data = reader.result as string;
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              data: base64Data,
+              filename: file.name,
+              mimeType: file.type,
+            }),
+          });
+          const json = await res.json();
+          if (!res.ok) throw new Error(json.error || 'Upload failed');
+          updateField(field, json.url as any);
+        } catch (err: any) {
+          setSaveError(err.message || 'Failed to upload image file.');
+        } finally {
+          setUploadingHero(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      setSaveError(err.message || 'File read error.');
+      setUploadingHero(false);
+    }
+  };
+
+  // Test HTML5 Web Audio order notification ding sound
+  const playTestDing = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.6);
+    } catch (e) {
+      // ignore
     }
   };
 
@@ -520,9 +584,9 @@ export const LiveVisualCustomizer: React.FC<LiveVisualCustomizerProps> = ({
                 <ImageIcon className="w-4 h-4 text-emerald-600" />
                 <div>
                   <h4 className={`font-serif text-sm font-medium ${darkMode ? 'text-white' : 'text-neutral-900'}`}>
-                    Hero Video / Banner CMS Box
+                    Hero Section (Triple-Split / Single)
                   </h4>
-                  <span className="text-[10px] text-neutral-400">Media format, height, zoom, focal point, and overlays</span>
+                  <span className="text-[10px] text-neutral-400">Wix Juniper Romp 3-column vertical grid & floating card</span>
                 </div>
               </div>
               {activeAccordion === 'hero' ? <ChevronUp className="w-4 h-4 text-neutral-400" /> : <ChevronDown className="w-4 h-4 text-neutral-400" />}
@@ -546,186 +610,709 @@ export const LiveVisualCustomizer: React.FC<LiveVisualCustomizerProps> = ({
                   />
                 </div>
 
-                {/* Media Format: Image vs Autoplay Video */}
+                {/* Hero Layout Mode: Triple-Split (Wix Juniper Romp) vs Single */}
                 <div>
                   <label className={`block font-medium mb-1.5 ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
-                    Media Format
+                    Hero Layout Style
                   </label>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
-                      onClick={() => updateField('heroBannerMediaType', 'image')}
-                      className={`flex-1 py-1.5 px-3 rounded-xs border text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                        (liveConfig.heroBannerMediaType || 'image') === 'image'
-                          ? 'bg-[#C89299] text-white border-[#C89299] shadow-2xs'
-                          : (darkMode ? 'bg-neutral-900 border-neutral-700 text-neutral-300' : 'bg-neutral-100 border-neutral-300 text-neutral-700')
+                      onClick={() => updateField('heroLayoutType', 'triple_split')}
+                      className={`py-2 px-3 rounded-xs border text-xs font-medium text-left transition-colors cursor-pointer ${
+                        (liveConfig.heroLayoutType || 'triple_split') === 'triple_split'
+                          ? 'bg-[#C89299] text-white border-[#C89299] shadow-xs'
+                          : (darkMode ? 'bg-neutral-900 border-neutral-700 text-neutral-300' : 'bg-neutral-50 border-neutral-300 text-neutral-700')
                       }`}
                     >
-                      <ImageIcon className="w-3.5 h-3.5" />
-                      <span>Photo (Image)</span>
+                      <span className="font-semibold block">Triple-Split (100vh)</span>
+                      <span className="text-[10px] opacity-80 block">3 Vertical columns + floating card</span>
                     </button>
                     <button
                       type="button"
-                      onClick={() => updateField('heroBannerMediaType', 'video')}
-                      className={`flex-1 py-1.5 px-3 rounded-xs border text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                        liveConfig.heroBannerMediaType === 'video'
-                          ? 'bg-[#C89299] text-white border-[#C89299] shadow-2xs'
-                          : (darkMode ? 'bg-neutral-900 border-neutral-700 text-neutral-300' : 'bg-neutral-100 border-neutral-300 text-neutral-700')
+                      onClick={() => updateField('heroLayoutType', 'single')}
+                      className={`py-2 px-3 rounded-xs border text-xs font-medium text-left transition-colors cursor-pointer ${
+                        liveConfig.heroLayoutType === 'single'
+                          ? 'bg-[#C89299] text-white border-[#C89299] shadow-xs'
+                          : (darkMode ? 'bg-neutral-900 border-neutral-700 text-neutral-300' : 'bg-neutral-50 border-neutral-300 text-neutral-700')
                       }`}
                     >
-                      <Film className="w-3.5 h-3.5" />
-                      <span>Autoplay Video (MP4)</span>
+                      <span className="font-semibold block">Single Full-Width</span>
+                      <span className="text-[10px] opacity-80 block">Standard full-width banner/video</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Media File Upload Button */}
-                <div>
-                  <label className={`block font-medium mb-1.5 ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
-                    Upload High-Resolution Media
-                  </label>
-                  <label className={`w-full py-2 px-3 border border-dashed rounded-xs flex items-center justify-center gap-2 cursor-pointer transition-colors ${
-                    darkMode ? 'bg-neutral-900/60 border-neutral-700 hover:border-neutral-500 text-neutral-300' : 'bg-neutral-50 border-neutral-300 hover:border-black text-neutral-700'
-                  }`}>
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>{uploadingHero ? 'Uploading Media...' : 'Choose Image or MP4 Video File'}</span>
-                    <input
-                      type="file"
-                      accept="image/*,video/mp4,video/webm"
-                      onChange={handleHeroFileUpload}
-                      disabled={uploadingHero}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-
-                {/* Direct Media URL Input */}
-                <div>
-                  <label className={`block font-medium mb-1 ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
-                    {liveConfig.heroBannerMediaType === 'video' ? 'Video URL (MP4 / WebM)' : 'Image URL'}
-                  </label>
-                  <input
-                    type="text"
-                    value={liveConfig.heroBannerMediaType === 'video' ? (liveConfig.heroBannerVideoUrl || '') : (liveConfig.heroBannerImageUrl || '')}
-                    onChange={(e) => {
-                      if (liveConfig.heroBannerMediaType === 'video') {
-                        updateField('heroBannerVideoUrl', e.target.value);
-                      } else {
-                        updateField('heroBannerImageUrl', e.target.value);
-                      }
-                    }}
-                    placeholder="https://..."
-                    className={`w-full px-3 py-2 border rounded-xs font-mono text-[11px] ${
-                      darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300 text-neutral-900'
-                    }`}
-                  />
-                </div>
-
-                {/* Dynamic Dimensions: Height & Scale Sliders */}
-                <div className="space-y-3 pt-1">
-                  <div>
-                    <div className="flex justify-between font-medium mb-1">
-                      <span className={darkMode ? 'text-neutral-300' : 'text-neutral-700'}>Container Height</span>
-                      <span className="font-mono text-neutral-500">{liveConfig.heroBannerHeight || 680}px</span>
+                {/* Triple Split Specific Inputs */}
+                {(liveConfig.heroLayoutType || 'triple_split') === 'triple_split' ? (
+                  <div className="space-y-4 pt-2 border-t border-neutral-200 dark:border-neutral-800">
+                    <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xs text-[11px] text-neutral-600 dark:text-neutral-300">
+                      Configure individual portrait images for each vertical column and customize the floating white card.
                     </div>
-                    <input
-                      type="range"
-                      min="450"
-                      max="900"
-                      step="10"
-                      value={liveConfig.heroBannerHeight || 680}
-                      onChange={(e) => updateField('heroBannerHeight', Number(e.target.value))}
-                      className="w-full accent-[#C89299] cursor-pointer"
-                    />
+
+                    {/* Column 1 Image */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className={`font-medium ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
+                          Column 1 Portrait (Baby / 0-24M)
+                        </label>
+                        <label className="text-[10px] text-[#C89299] hover:underline cursor-pointer flex items-center gap-1 font-semibold">
+                          <Upload className="w-3 h-3" />
+                          <span>Upload File</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleUploadField('heroColumn1ImageUrl', e)}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                      <input
+                        type="text"
+                        value={liveConfig.heroColumn1ImageUrl || ''}
+                        onChange={(e) => updateField('heroColumn1ImageUrl', e.target.value)}
+                        placeholder="https://..."
+                        className={`w-full px-3 py-1.5 border rounded-xs font-mono text-[11px] ${
+                          darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                        }`}
+                      />
+                    </div>
+
+                    {/* Column 2 Image */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className={`font-medium ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
+                          Column 2 Portrait (Toddler / 2-4Y)
+                        </label>
+                        <label className="text-[10px] text-[#C89299] hover:underline cursor-pointer flex items-center gap-1 font-semibold">
+                          <Upload className="w-3 h-3" />
+                          <span>Upload File</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleUploadField('heroColumn2ImageUrl', e)}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                      <input
+                        type="text"
+                        value={liveConfig.heroColumn2ImageUrl || ''}
+                        onChange={(e) => updateField('heroColumn2ImageUrl', e.target.value)}
+                        placeholder="https://..."
+                        className={`w-full px-3 py-1.5 border rounded-xs font-mono text-[11px] ${
+                          darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                        }`}
+                      />
+                    </div>
+
+                    {/* Column 3 Image */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className={`font-medium ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
+                          Column 3 Portrait (Kids / 5-8Y)
+                        </label>
+                        <label className="text-[10px] text-[#C89299] hover:underline cursor-pointer flex items-center gap-1 font-semibold">
+                          <Upload className="w-3 h-3" />
+                          <span>Upload File</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleUploadField('heroColumn3ImageUrl', e)}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                      <input
+                        type="text"
+                        value={liveConfig.heroColumn3ImageUrl || ''}
+                        onChange={(e) => updateField('heroColumn3ImageUrl', e.target.value)}
+                        placeholder="https://..."
+                        className={`w-full px-3 py-1.5 border rounded-xs font-mono text-[11px] ${
+                          darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                        }`}
+                      />
+                    </div>
+
+                    {/* Floating White Minimalist Card Settings */}
+                    <div className="p-3 border rounded-xs space-y-2.5 bg-neutral-50 dark:bg-neutral-900/40 border-neutral-200 dark:border-neutral-800">
+                      <span className="font-semibold block text-neutral-800 dark:text-neutral-200">
+                        Floating Minimalist Card Content (Left-Center)
+                      </span>
+                      
+                      <div>
+                        <label className="block text-[10px] text-neutral-500 mb-0.5">Card Tag Kicker</label>
+                        <input
+                          type="text"
+                          value={liveConfig.heroFloatingCardKicker || ''}
+                          onChange={(e) => updateField('heroFloatingCardKicker', e.target.value)}
+                          placeholder="BACHPAN PK · ATELIER"
+                          className={`w-full px-2.5 py-1 border rounded-xs ${
+                            darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                          }`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] text-neutral-500 mb-0.5">Card Headline</label>
+                        <input
+                          type="text"
+                          value={liveConfig.heroFloatingCardTitle || ''}
+                          onChange={(e) => updateField('heroFloatingCardTitle', e.target.value)}
+                          placeholder="Made For Pure Play"
+                          className={`w-full px-2.5 py-1 border rounded-xs font-serif ${
+                            darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                          }`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] text-neutral-500 mb-0.5">Card Description Text</label>
+                        <textarea
+                          rows={2}
+                          value={liveConfig.heroFloatingCardSubtitle || ''}
+                          onChange={(e) => updateField('heroFloatingCardSubtitle', e.target.value)}
+                          placeholder="Effortless, organic kids essentials..."
+                          className={`w-full px-2.5 py-1 border rounded-xs ${
+                            darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                          }`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] text-neutral-500 mb-0.5">Pill-Shaped Black CTA Text</label>
+                        <input
+                          type="text"
+                          value={liveConfig.heroFloatingCardCta || ''}
+                          onChange={(e) => updateField('heroFloatingCardCta', e.target.value)}
+                          placeholder="Shop All Products"
+                          className={`w-full px-2.5 py-1 border rounded-xs ${
+                            darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                          }`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] text-neutral-500 mb-0.5">Trust Tagline Under Button</label>
+                        <input
+                          type="text"
+                          value={liveConfig.heroFloatingCardTagline || ''}
+                          onChange={(e) => updateField('heroFloatingCardTagline', e.target.value)}
+                          placeholder="100% Breathable Cottons · Nationwide Cash on Delivery"
+                          className={`w-full px-2.5 py-1 border rounded-xs ${
+                            darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                          }`}
+                        />
+                      </div>
+                    </div>
                   </div>
-
-                  <div>
-                    <div className="flex justify-between font-medium mb-1">
-                      <span className={darkMode ? 'text-neutral-300' : 'text-neutral-700'}>Media Scale / Zoom</span>
-                      <span className="font-mono text-neutral-500">{liveConfig.heroBannerScale || 100}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="100"
-                      max="150"
-                      step="5"
-                      value={liveConfig.heroBannerScale || 100}
-                      onChange={(e) => updateField('heroBannerScale', Number(e.target.value))}
-                      className="w-full accent-[#C89299] cursor-pointer"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between font-medium mb-1">
-                      <span className={darkMode ? 'text-neutral-300' : 'text-neutral-700'}>Focal Point Cropper</span>
-                      <span className="capitalize font-mono text-neutral-500">{liveConfig.heroBannerFocalPoint || 'center'}</span>
-                    </div>
-                    <div className="grid grid-cols-5 gap-1 pt-1">
-                      {(['top', 'center', 'bottom', 'left', 'right'] as const).map((pos) => (
+                ) : (
+                  /* Single Banner Controls */
+                  <div className="space-y-4 pt-2 border-t border-neutral-200 dark:border-neutral-800">
+                    <div>
+                      <label className={`block font-medium mb-1.5 ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
+                        Single Media Format
+                      </label>
+                      <div className="flex gap-2">
                         <button
-                          key={pos}
                           type="button"
-                          onClick={() => updateField('heroBannerFocalPoint', pos)}
-                          className={`py-1 text-[10px] uppercase font-semibold border rounded-xs transition-colors cursor-pointer capitalize ${
-                            (liveConfig.heroBannerFocalPoint || 'center') === pos
+                          onClick={() => updateField('heroBannerMediaType', 'image')}
+                          className={`flex-1 py-1 px-3 rounded-xs border text-xs font-medium cursor-pointer ${
+                            (liveConfig.heroBannerMediaType || 'image') === 'image'
                               ? 'bg-[#C89299] text-white border-[#C89299]'
                               : (darkMode ? 'bg-neutral-900 border-neutral-700 text-neutral-300' : 'bg-neutral-100 border-neutral-300 text-neutral-700')
                           }`}
                         >
-                          {pos}
+                          Image
                         </button>
-                      ))}
+                        <button
+                          type="button"
+                          onClick={() => updateField('heroBannerMediaType', 'video')}
+                          className={`flex-1 py-1 px-3 rounded-xs border text-xs font-medium cursor-pointer ${
+                            liveConfig.heroBannerMediaType === 'video'
+                              ? 'bg-[#C89299] text-white border-[#C89299]'
+                              : (darkMode ? 'bg-neutral-900 border-neutral-700 text-neutral-300' : 'bg-neutral-100 border-neutral-300 text-neutral-700')
+                          }`}
+                        >
+                          Video (MP4)
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className={`font-medium ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
+                          Single Media URL
+                        </label>
+                        <label className="text-[10px] text-[#C89299] hover:underline cursor-pointer flex items-center gap-1 font-semibold">
+                          <Upload className="w-3 h-3" />
+                          <span>Upload File</span>
+                          <input
+                            type="file"
+                            accept="image/*,video/mp4"
+                            onChange={handleHeroFileUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                      <input
+                        type="text"
+                        value={liveConfig.heroBannerMediaType === 'video' ? (liveConfig.heroBannerVideoUrl || '') : (liveConfig.heroBannerImageUrl || '')}
+                        onChange={(e) => {
+                          if (liveConfig.heroBannerMediaType === 'video') {
+                            updateField('heroBannerVideoUrl', e.target.value);
+                          } else {
+                            updateField('heroBannerImageUrl', e.target.value);
+                          }
+                        }}
+                        placeholder="https://..."
+                        className={`w-full px-3 py-1.5 border rounded-xs font-mono text-[11px] ${
+                          darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                        }`}
+                      />
                     </div>
                   </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* 3b. WIX JUNIPER ROMP: MINIMALIST EXPLORE BY AGE GRID */}
+          <div className={`border rounded-sm overflow-hidden transition-colors ${
+            darkMode ? 'bg-neutral-950 border-neutral-800' : 'bg-white border-neutral-300 shadow-2xs'
+          }`}>
+            <button
+              type="button"
+              onClick={() => toggleAccordion('explore_age')}
+              className={`w-full p-4 flex items-center justify-between text-left cursor-pointer border-b ${
+                darkMode ? 'border-neutral-800 hover:bg-neutral-900' : 'border-neutral-200 hover:bg-neutral-50'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Grid className="w-4 h-4 text-rose-500" />
+                <div>
+                  <h4 className={`font-serif text-sm font-medium ${darkMode ? 'text-white' : 'text-neutral-900'}`}>
+                    Explore By Age Grid (Image 2)
+                  </h4>
+                  <span className="text-[10px] text-neutral-400">3 Tall vertical cards (Baby, Toddler, Kids) with diagonal arrow buttons</span>
+                </div>
+              </div>
+              {activeAccordion === 'explore_age' ? <ChevronUp className="w-4 h-4 text-neutral-400" /> : <ChevronDown className="w-4 h-4 text-neutral-400" />}
+            </button>
+
+            {activeAccordion === 'explore_age' && (
+              <div className="p-4 space-y-3.5 text-xs">
+                <div className="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-neutral-800">
+                  <div>
+                    <label className={`font-medium block ${darkMode ? 'text-neutral-200' : 'text-neutral-900'}`}>
+                      Show Explore By Age Section
+                    </label>
+                    <span className="text-[10px] text-neutral-400">Display 3-column milestone discovery grid</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={liveConfig.showExploreByAge ?? true}
+                    onChange={(e) => updateField('showExploreByAge', e.target.checked)}
+                    className="w-4 h-4 accent-[#C89299] cursor-pointer"
+                  />
                 </div>
 
-                {/* Text Overlays */}
-                <div className="space-y-2.5 pt-2 border-t border-neutral-200 dark:border-neutral-800">
+                <div>
+                  <label className="block font-medium mb-1">Section Title</label>
+                  <input
+                    type="text"
+                    value={liveConfig.exploreByAgeTitle || ''}
+                    onChange={(e) => updateField('exploreByAgeTitle', e.target.value)}
+                    placeholder="Explore By Age"
+                    className={`w-full px-3 py-1.5 border rounded-xs ${
+                      darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-medium mb-1">Section Subtitle</label>
+                  <input
+                    type="text"
+                    value={liveConfig.exploreByAgeSubtitle || ''}
+                    onChange={(e) => updateField('exploreByAgeSubtitle', e.target.value)}
+                    placeholder="Curated silhouettes engineered specifically for every milestone"
+                    className={`w-full px-3 py-1.5 border rounded-xs ${
+                      darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                    }`}
+                  />
+                </div>
+
+                <div className="space-y-3 pt-2 border-t border-neutral-200 dark:border-neutral-800">
+                  {/* Baby Card Image */}
                   <div>
-                    <label className={`block font-medium mb-1 ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
-                      Banner Tag Overlay
-                    </label>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="font-medium">Baby 0-24M Portrait Image</label>
+                      <label className="text-[10px] text-[#C89299] hover:underline cursor-pointer flex items-center gap-1 font-semibold">
+                        <Upload className="w-3 h-3" />
+                        <span>Upload</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleUploadField('exploreBabyImageUrl', e)}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
                     <input
                       type="text"
-                      value={liveConfig.heroBannerTag || ''}
-                      onChange={(e) => updateField('heroBannerTag', e.target.value)}
-                      placeholder="Tiny ones, big firsts"
-                      className={`w-full px-3 py-1.5 border rounded-xs ${
-                        darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300 text-neutral-900'
+                      value={liveConfig.exploreBabyImageUrl || ''}
+                      onChange={(e) => updateField('exploreBabyImageUrl', e.target.value)}
+                      placeholder="https://..."
+                      className={`w-full px-3 py-1.5 border rounded-xs font-mono text-[11px] ${
+                        darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
                       }`}
                     />
                   </div>
 
+                  {/* Toddler Card Image */}
                   <div>
-                    <label className={`block font-medium mb-1 ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
-                      Headline (Cormorant Garamond)
-                    </label>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="font-medium">Toddler 2-4Y Portrait Image</label>
+                      <label className="text-[10px] text-[#C89299] hover:underline cursor-pointer flex items-center gap-1 font-semibold">
+                        <Upload className="w-3 h-3" />
+                        <span>Upload</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleUploadField('exploreToddlerImageUrl', e)}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
                     <input
                       type="text"
-                      value={liveConfig.heroBannerTitle || ''}
-                      onChange={(e) => updateField('heroBannerTitle', e.target.value)}
-                      placeholder="Thoughtfully Made For Childhood Memories"
+                      value={liveConfig.exploreToddlerImageUrl || ''}
+                      onChange={(e) => updateField('exploreToddlerImageUrl', e.target.value)}
+                      placeholder="https://..."
+                      className={`w-full px-3 py-1.5 border rounded-xs font-mono text-[11px] ${
+                        darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                      }`}
+                    />
+                  </div>
+
+                  {/* Kids Card Image */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="font-medium">Kids 5-8Y Portrait Image</label>
+                      <label className="text-[10px] text-[#C89299] hover:underline cursor-pointer flex items-center gap-1 font-semibold">
+                        <Upload className="w-3 h-3" />
+                        <span>Upload</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleUploadField('exploreKidsImageUrl', e)}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                    <input
+                      type="text"
+                      value={liveConfig.exploreKidsImageUrl || ''}
+                      onChange={(e) => updateField('exploreKidsImageUrl', e.target.value)}
+                      placeholder="https://..."
+                      className={`w-full px-3 py-1.5 border rounded-xs font-mono text-[11px] ${
+                        darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                      }`}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 3c. WIX JUNIPER ROMP: INDEPENDENT HIGHLIGHT SHOWCASE */}
+          <div className={`border rounded-sm overflow-hidden transition-colors ${
+            darkMode ? 'bg-neutral-950 border-neutral-800' : 'bg-white border-neutral-300 shadow-2xs'
+          }`}>
+            <button
+              type="button"
+              onClick={() => toggleAccordion('highlight_showcase')}
+              className={`w-full p-4 flex items-center justify-between text-left cursor-pointer border-b ${
+                darkMode ? 'border-neutral-800 hover:bg-neutral-900' : 'border-neutral-200 hover:bg-neutral-50'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Star className="w-4 h-4 text-amber-500" />
+                <div>
+                  <h4 className={`font-serif text-sm font-medium ${darkMode ? 'text-white' : 'text-neutral-900'}`}>
+                    Independent Highlight Showcase (Image 2 Center)
+                  </h4>
+                  <span className="text-[10px] text-neutral-400">Large centered studio garment flanked by geometric star bullets</span>
+                </div>
+              </div>
+              {activeAccordion === 'highlight_showcase' ? <ChevronUp className="w-4 h-4 text-neutral-400" /> : <ChevronDown className="w-4 h-4 text-neutral-400" />}
+            </button>
+
+            {activeAccordion === 'highlight_showcase' && (
+              <div className="p-4 space-y-3.5 text-xs">
+                <div className="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-neutral-800">
+                  <div>
+                    <label className={`font-medium block ${darkMode ? 'text-neutral-200' : 'text-neutral-900'}`}>
+                      Show Highlight Showcase
+                    </label>
+                    <span className="text-[10px] text-neutral-400">Prominent spotlight below age cards</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={liveConfig.showHighlightShowcase ?? true}
+                    onChange={(e) => updateField('showHighlightShowcase', e.target.checked)}
+                    className="w-4 h-4 accent-[#C89299] cursor-pointer"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-medium mb-1">Showcase Title</label>
+                    <input
+                      type="text"
+                      value={liveConfig.highlightShowcaseTitle || ''}
+                      onChange={(e) => updateField('highlightShowcaseTitle', e.target.value)}
+                      placeholder="Heirloom Ribbed Knit Romper & Bonnet"
                       className={`w-full px-3 py-1.5 border rounded-xs font-serif ${
-                        darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300 text-neutral-900'
+                        darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
                       }`}
                     />
                   </div>
-
                   <div>
-                    <label className={`block font-medium mb-1 ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
-                      Subtitle / Supporting Description
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={liveConfig.heroBannerSubtitle || ''}
-                      onChange={(e) => updateField('heroBannerSubtitle', e.target.value)}
-                      placeholder="Hand-tailored festive Baba Suits..."
-                      className={`w-full px-3 py-1.5 border rounded-xs leading-relaxed ${
-                        darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300 text-neutral-900'
+                    <label className="block font-medium mb-1">Price in PKR</label>
+                    <input
+                      type="number"
+                      value={liveConfig.highlightShowcasePrice || 2950}
+                      onChange={(e) => updateField('highlightShowcasePrice', Number(e.target.value))}
+                      className={`w-full px-3 py-1.5 border rounded-xs ${
+                        darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
                       }`}
                     />
                   </div>
                 </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="font-medium">Centered Featured Garment Image URL</label>
+                    <label className="text-[10px] text-[#C89299] hover:underline cursor-pointer flex items-center gap-1 font-semibold">
+                      <Upload className="w-3 h-3" />
+                      <span>Upload</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleUploadField('highlightShowcaseImageUrl', e)}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    value={liveConfig.highlightShowcaseImageUrl || ''}
+                    onChange={(e) => updateField('highlightShowcaseImageUrl', e.target.value)}
+                    placeholder="https://..."
+                    className={`w-full px-3 py-1.5 border rounded-xs font-mono text-[11px] ${
+                      darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                    }`}
+                  />
+                </div>
+
+                {/* 4 Bullet Callouts */}
+                <div className="space-y-2 pt-2 border-t border-neutral-200 dark:border-neutral-800">
+                  <span className="font-semibold block text-neutral-800 dark:text-neutral-200">
+                    Geometric Star Callouts (✦)
+                  </span>
+                  <div>
+                    <label className="block text-[10px] text-neutral-400">Bullet 1 (Left Top)</label>
+                    <input
+                      type="text"
+                      value={liveConfig.highlightBullet1 || ''}
+                      onChange={(e) => updateField('highlightBullet1', e.target.value)}
+                      className={`w-full px-2.5 py-1 border rounded-xs ${
+                        darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-neutral-400">Bullet 2 (Left Bottom)</label>
+                    <input
+                      type="text"
+                      value={liveConfig.highlightBullet2 || ''}
+                      onChange={(e) => updateField('highlightBullet2', e.target.value)}
+                      className={`w-full px-2.5 py-1 border rounded-xs ${
+                        darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-neutral-400">Bullet 3 (Right Top)</label>
+                    <input
+                      type="text"
+                      value={liveConfig.highlightBullet3 || ''}
+                      onChange={(e) => updateField('highlightBullet3', e.target.value)}
+                      className={`w-full px-2.5 py-1 border rounded-xs ${
+                        darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-neutral-400">Bullet 4 (Right Bottom)</label>
+                    <input
+                      type="text"
+                      value={liveConfig.highlightBullet4 || ''}
+                      onChange={(e) => updateField('highlightBullet4', e.target.value)}
+                      className={`w-full px-2.5 py-1 border rounded-xs ${
+                        darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                      }`}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 3d. WIX JUNIPER ROMP: ASYMMETRIC PHOTOGRAPHY COLLAGE GRID */}
+          <div className={`border rounded-sm overflow-hidden transition-colors ${
+            darkMode ? 'bg-neutral-950 border-neutral-800' : 'bg-white border-neutral-300 shadow-2xs'
+          }`}>
+            <button
+              type="button"
+              onClick={() => toggleAccordion('collage')}
+              className={`w-full p-4 flex items-center justify-between text-left cursor-pointer border-b ${
+                darkMode ? 'border-neutral-800 hover:bg-neutral-900' : 'border-neutral-200 hover:bg-neutral-50'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Layers className="w-4 h-4 text-purple-500" />
+                <div>
+                  <h4 className={`font-serif text-sm font-medium ${darkMode ? 'text-white' : 'text-neutral-900'}`}>
+                    Asymmetric Collage Grid (Image 3)
+                  </h4>
+                  <span className="text-[10px] text-neutral-400">"Loved Right Now" 2 large top hero slots + cluster gallery</span>
+                </div>
+              </div>
+              {activeAccordion === 'collage' ? <ChevronUp className="w-4 h-4 text-neutral-400" /> : <ChevronDown className="w-4 h-4 text-neutral-400" />}
+            </button>
+
+            {activeAccordion === 'collage' && (
+              <div className="p-4 space-y-3.5 text-xs">
+                <div className="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-neutral-800">
+                  <div>
+                    <label className={`font-medium block ${darkMode ? 'text-neutral-200' : 'text-neutral-900'}`}>
+                      Show Asymmetric Collage Grid
+                    </label>
+                    <span className="text-[10px] text-neutral-400">Non-uniform editorial collage</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={liveConfig.showParentFavoritesCollage ?? true}
+                    onChange={(e) => updateField('showParentFavoritesCollage', e.target.checked)}
+                    className="w-4 h-4 accent-[#C89299] cursor-pointer"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-medium mb-1">Collage Section Title</label>
+                  <input
+                    type="text"
+                    value={liveConfig.parentFavoritesTitle || ''}
+                    onChange={(e) => updateField('parentFavoritesTitle', e.target.value)}
+                    placeholder="Loved Right Now"
+                    className={`w-full px-3 py-1.5 border rounded-xs font-serif ${
+                      darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                    }`}
+                  />
+                </div>
+
+                {/* Top Slot 1 Image */}
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="font-medium">Top Slot 1 Image URL (Wide Lifestyle)</label>
+                    <label className="text-[10px] text-[#C89299] hover:underline cursor-pointer flex items-center gap-1 font-semibold">
+                      <Upload className="w-3 h-3" />
+                      <span>Upload</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleUploadField('parentFavoritesHero1Url', e)}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    value={liveConfig.parentFavoritesHero1Url || ''}
+                    onChange={(e) => updateField('parentFavoritesHero1Url', e.target.value)}
+                    className={`w-full px-3 py-1.5 border rounded-xs font-mono text-[11px] ${
+                      darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                    }`}
+                  />
+                </div>
+
+                {/* Top Slot 2 Image */}
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="font-medium">Top Slot 2 Image URL (Editorial Square)</label>
+                    <label className="text-[10px] text-[#C89299] hover:underline cursor-pointer flex items-center gap-1 font-semibold">
+                      <Upload className="w-3 h-3" />
+                      <span>Upload</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleUploadField('parentFavoritesHero2Url', e)}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    value={liveConfig.parentFavoritesHero2Url || ''}
+                    onChange={(e) => updateField('parentFavoritesHero2Url', e.target.value)}
+                    className={`w-full px-3 py-1.5 border rounded-xs font-mono text-[11px] ${
+                      darkMode ? 'bg-neutral-900 border-neutral-700 text-white' : 'bg-white border-neutral-300'
+                    }`}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 3e. LIVE ORDER AUDIO DING NOTIFICATION CONTROL */}
+          <div className={`border rounded-sm overflow-hidden transition-colors ${
+            darkMode ? 'bg-neutral-950 border-neutral-800' : 'bg-white border-neutral-300 shadow-2xs'
+          }`}>
+            <button
+              type="button"
+              onClick={() => toggleAccordion('order_ding')}
+              className={`w-full p-4 flex items-center justify-between text-left cursor-pointer border-b ${
+                darkMode ? 'border-neutral-800 hover:bg-neutral-900' : 'border-neutral-200 hover:bg-neutral-50'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Volume2 className="w-4 h-4 text-emerald-500" />
+                <div>
+                  <h4 className={`font-serif text-sm font-medium ${darkMode ? 'text-white' : 'text-neutral-900'}`}>
+                    Live Order Audio Indicator
+                  </h4>
+                  <span className="text-[10px] text-neutral-400">Audible HTML5 Web Audio ding notification on new orders</span>
+                </div>
+              </div>
+              {activeAccordion === 'order_ding' ? <ChevronUp className="w-4 h-4 text-neutral-400" /> : <ChevronDown className="w-4 h-4 text-neutral-400" />}
+            </button>
+
+            {activeAccordion === 'order_ding' && (
+              <div className="p-4 space-y-3 text-xs">
+                <p className="text-neutral-600 dark:text-neutral-300 leading-relaxed">
+                  When a customer completes checkout or places an order via COD / Bank Transfer, the admin panel produces an audible ding chime in real time.
+                </p>
+                <button
+                  type="button"
+                  onClick={playTestDing}
+                  className="px-4 py-2 rounded-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium flex items-center gap-2 cursor-pointer shadow-xs active:scale-98 transition-all"
+                >
+                  <Volume2 className="w-4 h-4" />
+                  <span>Play Test Ding Sound 🔔</span>
+                </button>
               </div>
             )}
           </div>
@@ -1288,60 +1875,94 @@ export const LiveVisualCustomizer: React.FC<LiveVisualCustomizerProps> = ({
                   </div>
                 </div>
 
-                {/* 3. Preview Hero Section */}
+                {/* 3. Preview Hero Section (Wix Juniper Romp Triple-Split or Single) */}
                 {liveConfig.showHeroBanner && (
-                  <div 
-                    style={{
-                      height: `${Math.round((liveConfig.heroBannerHeight || 680) * 0.45)}px`,
-                    }}
-                    className="relative w-full overflow-hidden flex items-center justify-center text-center bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800"
-                  >
-                    {liveConfig.heroBannerMediaType === 'video' ? (
-                      <video
-                        src={liveConfig.heroBannerVideoUrl || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-full object-cover"
-                        style={{
-                          transform: `scale(${(liveConfig.heroBannerScale || 100) / 100})`,
-                          objectPosition: liveConfig.heroBannerFocalPoint || 'center',
-                        }}
-                      />
-                    ) : (
-                      <img
-                        src={liveConfig.heroBannerImageUrl || 'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=2000&q=85'}
-                        alt="Hero Preview"
-                        className="w-full h-full object-cover"
-                        style={{
-                          transform: `scale(${(liveConfig.heroBannerScale || 100) / 100})`,
-                          objectPosition: liveConfig.heroBannerFocalPoint || 'center',
-                        }}
-                      />
-                    )}
+                  (liveConfig.heroLayoutType || 'triple_split') === 'triple_split' ? (
+                    <div className="relative w-full h-[260px] overflow-hidden bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800">
+                      {/* 3-Column Vertical Grid */}
+                      <div className="grid grid-cols-3 w-full h-full divide-x divide-white/20">
+                        <div className="relative h-full overflow-hidden bg-neutral-800">
+                          <img
+                            src={liveConfig.heroColumn1ImageUrl || 'https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=400&q=80'}
+                            alt="Col 1"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/20" />
+                          <span className="absolute bottom-1.5 left-1.5 text-[7px] text-white/90 uppercase tracking-widest font-light">0-24M</span>
+                        </div>
+                        <div className="relative h-full overflow-hidden bg-neutral-800">
+                          <img
+                            src={liveConfig.heroColumn2ImageUrl || 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=400&q=80'}
+                            alt="Col 2"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/20" />
+                          <span className="absolute bottom-1.5 left-1.5 text-[7px] text-white/90 uppercase tracking-widest font-light">2-4Y</span>
+                        </div>
+                        <div className="relative h-full overflow-hidden bg-neutral-800">
+                          <img
+                            src={liveConfig.heroColumn3ImageUrl || 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=400&q=80'}
+                            alt="Col 3"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/20" />
+                          <span className="absolute bottom-1.5 left-1.5 text-[7px] text-white/90 uppercase tracking-widest font-light">5-8Y</span>
+                        </div>
+                      </div>
 
-                    {/* Dark gradient overlay for typography */}
-                    <div className="absolute inset-0 bg-black/45" />
-
-                    {/* Overlay Text */}
-                    <div className="relative z-10 px-4 max-w-sm text-white space-y-1">
-                      <span className="text-[8px] uppercase tracking-[0.28em] font-medium text-amber-200 block">
-                        {liveConfig.heroBannerTag || 'Tiny ones, big firsts'}
-                      </span>
-                      <h4 className="font-serif text-sm sm:text-base font-normal leading-tight">
-                        {liveConfig.heroBannerTitle || 'Thoughtfully Made For Childhood Memories'}
-                      </h4>
-                      <p className="text-[8px] font-light text-neutral-200 line-clamp-2 leading-relaxed">
-                        {liveConfig.heroBannerSubtitle || 'Hand-tailored festive Baba Suits, fairy-tale chiffon frocks, and organic newborn essentials.'}
-                      </p>
-                      <div className="pt-1">
+                      {/* Floating Minimalist White Card (Left-Center) */}
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 max-w-[210px] p-3 rounded-2xl bg-white/95 text-neutral-900 shadow-xl border border-neutral-100 dark:bg-neutral-900/95 dark:text-white dark:border-neutral-800">
+                        <span className="text-[6.5px] uppercase tracking-[0.2em] font-semibold text-[#C89299] block mb-0.5">
+                          {liveConfig.heroFloatingCardKicker || 'BACHPAN PK · ATELIER'}
+                        </span>
+                        <h4 className="font-serif text-xs font-normal leading-tight mb-1 text-neutral-950 dark:text-white">
+                          {liveConfig.heroFloatingCardTitle || 'Made For Pure Play'}
+                        </h4>
+                        <p className="text-[7.5px] font-light text-neutral-600 dark:text-neutral-300 line-clamp-2 leading-tight mb-2">
+                          {liveConfig.heroFloatingCardSubtitle || 'Effortless, organic kids essentials thoughtfully crafted for every crawl, step, and joyful jump.'}
+                        </p>
+                        <div className="inline-block px-2.5 py-1 rounded-full text-[7.5px] uppercase tracking-wider font-semibold bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 shadow-xs">
+                          {liveConfig.heroFloatingCardCta || 'Shop All Products'} →
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div 
+                      style={{
+                        height: `${Math.round((liveConfig.heroBannerHeight || 680) * 0.45)}px`,
+                      }}
+                      className="relative w-full overflow-hidden flex items-center justify-center text-center bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800"
+                    >
+                      {liveConfig.heroBannerMediaType === 'video' ? (
+                        <video
+                          src={liveConfig.heroBannerVideoUrl || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'}
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <img
+                          src={liveConfig.heroBannerImageUrl || 'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=2000&q=85'}
+                          alt="Hero Preview"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-black/45" />
+                      <div className="relative z-10 px-4 max-w-sm text-white space-y-1">
+                        <span className="text-[8px] uppercase tracking-[0.28em] font-medium text-amber-200 block">
+                          {liveConfig.heroBannerTag || 'Tiny ones, big firsts'}
+                        </span>
+                        <h4 className="font-serif text-sm font-normal leading-tight">
+                          {liveConfig.heroBannerTitle || 'Thoughtfully Made'}
+                        </h4>
                         <span className="px-3 py-0.5 bg-[#C89299] text-white text-[8px] uppercase tracking-wider rounded-full shadow-2xs font-medium inline-block">
                           Shop New In
                         </span>
                       </div>
                     </div>
-                  </div>
+                  )
                 )}
 
                 {/* 4. Preview Trust Badges Bar */}
@@ -1364,31 +1985,95 @@ export const LiveVisualCustomizer: React.FC<LiveVisualCustomizerProps> = ({
                   </div>
                 )}
 
-                {/* 5. Preview Categories 5-Column Grid */}
-                {(liveConfig.showCategoryGrid ?? true) && (
+                {/* 4b. Preview Explore By Age 3-Column Grid (Image 2) */}
+                {(liveConfig.showExploreByAge ?? true) && (
                   <div className="p-3 space-y-2 border-b border-neutral-200 dark:border-neutral-800">
                     <div className="text-center">
-                      <span className="text-[7px] uppercase tracking-[0.25em] text-neutral-400 block">Curated Wardrobes</span>
+                      <span className="text-[7px] uppercase tracking-[0.25em] text-[#C89299] block">Milestones</span>
                       <h5 className={`font-serif text-xs font-normal ${isCustomerDark ? 'text-white' : 'text-neutral-900'}`}>
-                        {liveConfig.categorySectionTitle || 'Shop by category'}
+                        {liveConfig.exploreByAgeTitle || 'Explore By Age'}
                       </h5>
                     </div>
-                    <div className="grid grid-cols-5 gap-1.5">
+                    <div className="grid grid-cols-3 gap-2">
                       {[
-                        { title: 'Bodysuits', img: 'https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&w=400&q=80' },
-                        { title: 'Sets', img: 'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=400&q=80' },
-                        { title: 'Blankets', img: 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&w=400&q=80' },
-                        { title: 'Diaper Bags', img: 'https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=400&q=80' },
-                        { title: 'Frocks', img: 'https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&w=400&q=80' }
-                      ].map((c) => (
-                        <div key={c.title} className="relative aspect-[3/4] rounded-[6px] overflow-hidden bg-neutral-200">
-                          <img src={c.img} alt={c.title} className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                          <span className="absolute bottom-1 left-1 right-1 text-[8px] font-serif text-white truncate font-medium">
-                            {c.title}
+                        { title: 'Baby 0-24M', img: liveConfig.exploreBabyImageUrl || 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=400&q=80' },
+                        { title: 'Toddler 2-4Y', img: liveConfig.exploreToddlerImageUrl || 'https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=400&q=80' },
+                        { title: 'Kids 5-8Y', img: liveConfig.exploreKidsImageUrl || 'https://images.unsplash.com/photo-1543332164-6e82f355badc?auto=format&fit=crop&w=400&q=80' },
+                      ].map((item) => (
+                        <div key={item.title} className="relative aspect-[3/4] rounded-lg overflow-hidden bg-neutral-200 border border-neutral-200/80 dark:border-neutral-800">
+                          <img src={item.img} alt={item.title} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                          <span className="absolute bottom-1.5 left-1.5 text-[8px] font-serif text-white font-medium">
+                            {item.title}
                           </span>
+                          <div className="absolute bottom-1.5 right-1.5 w-4 h-4 rounded-full bg-white/90 text-neutral-900 flex items-center justify-center text-[8px]">
+                            ↗
+                          </div>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4c. Preview Independent Highlight Showcase (Image 2 Center) */}
+                {(liveConfig.showHighlightShowcase ?? true) && (
+                  <div className="p-3 border-b border-neutral-200 dark:border-neutral-800 bg-[#F9F7F4] dark:bg-neutral-900/60">
+                    <div className="text-center mb-2">
+                      <span className="text-[6.5px] uppercase tracking-widest text-[#C89299] block font-semibold">
+                        {liveConfig.highlightShowcaseKicker || 'ATELIER SHOWCASE'}
+                      </span>
+                      <h6 className={`font-serif text-[11px] font-medium leading-tight ${isCustomerDark ? 'text-white' : 'text-neutral-900'}`}>
+                        {liveConfig.highlightShowcaseTitle || 'Heirloom Ribbed Knit Romper & Bonnet'}
+                      </h6>
+                    </div>
+                    <div className="grid grid-cols-12 gap-2 items-center">
+                      <div className="col-span-3 text-[7px] space-y-1 text-neutral-500">
+                        <p>✦ 100% Organic</p>
+                        <p>✦ Safe Dyes</p>
+                      </div>
+                      <div className="col-span-6 flex justify-center">
+                        <div className="w-20 h-24 rounded-xl overflow-hidden bg-white shadow-md border border-neutral-200 dark:border-neutral-700">
+                          <img
+                            src={liveConfig.highlightShowcaseImageUrl || 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=400&q=80'}
+                            alt="Showcase"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                      <div className="col-span-3 text-[7px] space-y-1 text-neutral-500">
+                        <p>✦ Play-Proof</p>
+                        <p>✦ Easy Snaps</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4d. Preview Asymmetric Photography Collage Grid (Image 3) */}
+                {(liveConfig.showParentFavoritesCollage ?? true) && (
+                  <div className="p-3 space-y-2 border-b border-neutral-200 dark:border-neutral-800">
+                    <div className="flex items-center justify-between">
+                      <h6 className={`font-serif text-[11px] font-normal ${isCustomerDark ? 'text-white' : 'text-neutral-900'}`}>
+                        {liveConfig.parentFavoritesTitle || 'Loved Right Now'}
+                      </h6>
+                      <span className="text-[7px] text-[#C89299]">Editorial</span>
+                    </div>
+                    <div className="grid grid-cols-12 gap-1.5">
+                      <div className="col-span-7 h-16 rounded-lg overflow-hidden bg-neutral-200 relative">
+                        <img
+                          src={liveConfig.parentFavoritesHero1Url || 'https://images.unsplash.com/photo-1471286174890-9c112ffca56a?auto=format&fit=crop&w=400&q=80'}
+                          alt="Hero 1"
+                          className="w-full h-full object-cover"
+                        />
+                        <span className="absolute bottom-1 left-1 text-[7px] text-white bg-black/60 px-1 rounded-2xs">Lifestyle</span>
+                      </div>
+                      <div className="col-span-5 h-16 rounded-lg overflow-hidden bg-neutral-200 relative">
+                        <img
+                          src={liveConfig.parentFavoritesHero2Url || 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=400&q=80'}
+                          alt="Hero 2"
+                          className="w-full h-full object-cover"
+                        />
+                        <span className="absolute bottom-1 left-1 text-[7px] text-white bg-black/60 px-1 rounded-2xs">Craft</span>
+                      </div>
                     </div>
                   </div>
                 )}
